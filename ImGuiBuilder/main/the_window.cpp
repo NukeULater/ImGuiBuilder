@@ -32,22 +32,10 @@ window::window( void* func_draw ) : m_func_draw( func_draw )
 
 	m_glfwindow = glfwCreateWindow( 1280, 720, "ImGuiBuilder!", nullptr, nullptr );
 
-	if ( !m_glfwindow ) return;
+	if ( m_glfwindow == NULL ) return;
 
 	glfwMakeContextCurrent( m_glfwindow );
-
 	glfwSwapInterval( 1 );
-
-#if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
-	bool err = gl3wInit( ) != 0;
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
-	bool err = glewInit( ) != GLEW_OK;
-#endif
-	//if ( err )
-	//{
-	//	fprintf( stderr, "Failed to initialize OpenGL loader!\n" );
-	//	return;
-	//}
 
 	IMGUI_CHECKVERSION( );
 

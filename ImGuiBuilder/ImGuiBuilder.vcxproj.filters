@@ -77,6 +77,7 @@
       <Filter>third-party\ImGuiFileDialog</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="third-party\ImGui\imgui_demo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main\imgui_builder.h">
@@ -143,5 +144,6 @@
       <Filter>third-party\ImGuiFileDialog</Filter>
     </ClInclude>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="third-party\ImGui\opengl\imgui_impl_opengl3_loader.h" />
   </ItemGroup>
 </Project>

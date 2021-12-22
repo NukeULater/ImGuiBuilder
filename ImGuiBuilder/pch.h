@@ -29,8 +29,8 @@
 // ===========================
 
 #ifndef _OPENGL2
-#include <GL/gl3w.h>
-#endif
+#include <opengl/imgui_impl_opengl3_loader.h>
+#endif // _OPENGL2
 #include <GLFW/glfw3.h>
 
 // ===========================

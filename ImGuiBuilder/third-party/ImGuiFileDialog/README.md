@@ -1,4 +1,4 @@
-[<img src="https://github.com/aiekick/ImGuiFileDialog/workflows/Win/badge.svg" width="150"/>](https://github.com/aiekick/ImGuiFileDialog/actions?query=workflow%3AWin) 
+[<img src="https://github.com/aiekick/ImGuiFileDialog/workflows/Win/badge.svg" width="150"/>](https://github.com/aiekick/ImGuiFileDialog/actions?query=workflow%3AWin)
 [<img src="https://github.com/aiekick/ImGuiFileDialog/workflows/Linux/badge.svg" width="165"/>](https://github.com/aiekick/ImGuiFileDialog/actions?query=workflow%3ALinux)
 [<img src="https://github.com/aiekick/ImGuiFileDialog/workflows/Osx/badge.svg" width="150"/>](https://github.com/aiekick/ImGuiFileDialog/actions?query=workflow%3AOsx)
 
@@ -8,9 +8,10 @@
 
 ImGuiFileDialog is a file selection dialog built for (and using only) [Dear ImGui](https://github.com/ocornut/imgui).
 
-My primary goal was to have a custom pane with widgets according to file extension. This was not possible using other solutions.
+My primary goal was to have a custom pane with widgets according to file extension. This was not possible using other
+solutions.
 
-## Structure of this repo
+## Structure
 
 * The library is in [Lib_Only branch](https://github.com/aiekick/ImGuiFileDialog/tree/Lib_Only)
 * A demo app can be found the [master branch](https://github.com/aiekick/ImGuiFileDialog/tree/master)
@@ -20,56 +21,62 @@ This library is designed to be dropped into your source code rather than compile
 From your project directory:
 
 ```
-mkdir lib
+mkdir lib    <or 3rdparty, or externals, etc.>
 cd lib
 git clone https://github.com/aiekick/ImGuiFileDialog.git
 git checkout Lib_Only
 ```
 
-These commands create a `lib` directory where you can store any third-party dependencies used in your 
-project, downloads the ImGuiFileDialog git repository and checks out the Lib_Only branch where the 
-actual library code is located.
+These commands create a `lib` directory where you can store any third-party dependencies used in your project, downloads
+the ImGuiFileDialog git repository and checks out the Lib_Only branch where the actual library code is located.
 
-Add `lib/ImGuiFileDialog/ImGuiFileDialog.cpp` to your build system and include 
-`lib/ImGuiFileDialog/ImGuiFileDialog.h` in your source code. ImGuiFileLib will compile with and be 
-included directly in your executable file.
+Add `lib/ImGuiFileDialog/ImGuiFileDialog.cpp` to your build system and include
+`lib/ImGuiFileDialog/ImGuiFileDialog.h` in your source code. ImGuiFileLib will compile with and be included directly in
+your executable file.
 
-If, for example, your project uses cmake, look for a line like `add_executable(my_project_name main.cpp)` 
-and change it to `add_executable(my_project_name lib/ImGuiFileDialog/ImGuiFileDialog.cpp main.cpp)`. 
-This tells the compiler where to find the source code declared in `ImGuiFileDialog.h` which you included in your own source code.
+If, for example, your project uses cmake, look for a line like `add_executable(my_project_name main.cpp)`
+and change it to `add_executable(my_project_name lib/ImGuiFileDialog/ImGuiFileDialog.cpp main.cpp)`. This tells the
+compiler where to find the source code declared in `ImGuiFileDialog.h` which you included in your own source code.
 
-You must also, of course, have added [Dear ImGui](https://github.com/ocornut/imgui) to your project for this to work at all.
+## Requirements:
 
+You must also, of course, have added [Dear ImGui](https://github.com/ocornut/imgui) to your project for this to work at
+all.
+
+[dirent v1.23](https://github.com/tronkko/dirent/tree/v1.23) is required to use ImGuiFileDialog under Windows. It is
+included in the Lib_Only branch for your convenience.
 
 ## Features
 
-- Separate system for call and display 
-  - can be many func calls with different params for one display func by ex
-- Can use custom pane via function binding
-  - this pane can block the validation of the dialog
-  - can also display different things according to current filter and User Datas
-- Support of Filter Custom Coloring / Icons / text 
-- Multi Selection (ctrl/shift + click) :
-  - 0 => infinite
-  - 1 => one file (default)
-  - n => n files
-- Compatible with MacOs, Linux, Win
-  - On Win version you can list Drives
-- Support of Modal/Standard dialog type
-- Support both Mode : File Chooser or Directory Chooser
-- Support filter collection / Custom filter name
-- Support dir/files Exploring with keys : Up / Down / Enter (open dir) / Backspace (come back)
-- Support dir/files Exploring by input char (case insensitive)
-- Support bookmark creation/edition/call for directory (can have custom name corresponding to a path)
-- Support input path edition by right click on a path button
-- Support of a 'Confirm to Overwrite" dialog if File Exist
-- A C Api is available (Succesfully testec with CimGui
+- Separate system for call and display
+    - Can have many function calls with different parameters for one display function, for example
+- Can create a custom pane with any widgets via function binding
+    - This pane can block the validation of the dialog
+    - Can also display different things according to current filter and UserDatas
+- Advanced file style for file/dir/link coloring / icons / font
+- Multi-selection (ctrl/shift + click) :
+    - 0 => Infinite
+    - 1 => One file (default)
+    - n => n files
+- Compatible with MacOs, Linux, Windows
+    - Windows version can list drives
+- Supports modal or standard dialog types
+- Select files or directories
+- Filter groups and custom filter names
+- Keyboard navigation (arrows, backspace, enter)
+- Exploring by entering characters (case insensitive)
+- Directory bookmarks
+- Directory manual entry (right click on any path element)
+- Optional 'Confirm to Overwrite" dialog if file exists
+- Thumbnails Display (agnostic way for compatibility with any backend, sucessfully tested with OpenGl and Vulkan)
+- C Api (succesfully tested with CimGui)
 
 ## Singleton Pattern vs. Multiple Instances
 
-### Single Dialog : 
+### Single Dialog :
 
-If you only need to display one file dialog at a time, use ImGuiFileDialog's singleton pattern to avoid explicitly declaring an object:
+If you only need to display one file dialog at a time, use ImGuiFileDialog's singleton pattern to avoid explicitly
+declaring an object:
 
 ```cpp
 ImGuiFileDialog::Instance()->method_of_your_choice();
@@ -87,6 +94,7 @@ instance_b.method_of_your_choice();
 ```
 
 ## Simple Dialog :
+
 ```cpp
 void drawGui()
 { 
@@ -110,12 +118,13 @@ void drawGui()
   }
 }
 ```
-![alt text](https://github.com/aiekick/ImGuiFileDialog/blob/master/doc/dlg_simple.gif)
 
+![alt text](https://github.com/aiekick/ImGuiFileDialog/blob/master/doc/dlg_simple.gif)
 
 ## Directory Chooser :
 
 To have a directory chooser, set the file extension filter to nullptr:
+
 ```cpp
 ImGuiFileDialog::Instance()->OpenDialog("ChooseDirDlgKey", "Choose a Directory", nullptr, ".");
 ```
@@ -124,17 +133,18 @@ In this mode you can select any directory with one click and open a directory wi
 
 ![directoryChooser](https://github.com/aiekick/ImGuiFileDialog/blob/master/doc/directoryChooser.gif)
 
-
 ## Dialog with Custom Pane :
 
 The signature of the custom pane callback is:
 
 ### for C++ :
+
 ```cpp
 void(const char *vFilter, IGFDUserDatas vUserDatas, bool *vCantContinue)
 ```
 
 ### for C :
+
 ```c
 void(const char *vFilter, void* vUserDatas, bool *vCantContinue)
 ```
@@ -182,50 +192,112 @@ void drawGui()
   }
 }
 ```
-![alt text](https://github.com/aiekick/ImGuiFileDialog/blob/master/doc/dlg_with_pane.gif)
 
-## Filter Infos
+![alt text](https://github.com/aiekick/ImGuiFileDialog/blob/master/doc/doc/dlg_with_pane.gif)
 
-You can define a color for a filter type
+## File Style : Custom icons and colors by extension
+
+You can define style for files/dirs/links in many ways :
+
+the style can be colors, icons and fonts
+
+the general form is :
 ```cpp
-ImGuiFileDialog::Instance()->SetExtentionInfos(".cpp", ImVec4(1,1,0, 0.9));
-ImGuiFileDialog::Instance()->SetExtentionInfos(".h", ImVec4(0,1,0, 0.9));
-ImGuiFileDialog::Instance()->SetExtentionInfos(".hpp", ImVec4(0,0,1, 0.9));
-ImGuiFileDialog::Instance()->SetExtentionInfos(".md", ImVec4(1,0,1, 0.9));
+ImGuiFileDialog::Instance()->SetFileStyle(styleType, criteria, color, icon, font);
+
+styleType can be thoses :
+
+IGFD_FileStyleByTypeFile				// define style for all files
+IGFD_FileStyleByTypeDir					// define style for all dir
+IGFD_FileStyleByTypeLink				// define style for all link
+IGFD_FileStyleByExtention				// define style by extention, for files or links
+IGFD_FileStyleByFullName				// define style for particular file/dir/link full name (filename + extention)
+IGFD_FileStyleByContainedInFullName		// define style for file/dir/link when criteria is contained in full name
+```
+
+ImGuiFileDialog accepts icon font macros as well as text tags for file types.
+
+[ImGuIFontStudio](https://github.com/aiekick/ImGuiFontStudio) is useful here. I wrote it to make it easy to create 
+custom icon sets for use with Dear ImGui.  
+
+It is inspired by [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders), which can also be used with 
+ImGuiFileDialog.
+
+samples :
+
+```cpp
+// define style by file extention and Add an icon for .png files 
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtention, ".png", ImVec4(0.0f, 1.0f, 1.0f, 0.9f), ICON_IGFD_FILE_PIC, font1);
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtention, ".gif", ImVec4(0.0f, 1.0f, 0.5f, 0.9f), "[GIF]");
+
+// define style for all directories
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByTypeDir, "", ImVec4(0.5f, 1.0f, 0.9f, 0.9f), ICON_IGFD_FOLDER);
+// can be for a specific directory
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByTypeDir, ".git", ImVec4(0.5f, 1.0f, 0.9f, 0.9f), ICON_IGFD_FOLDER);
+
+// define style for all files
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByTypeFile, "", ImVec4(0.5f, 1.0f, 0.9f, 0.9f), ICON_IGFD_FILE);
+// can be for a specific file
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByTypeFile, ".git", ImVec4(0.5f, 1.0f, 0.9f, 0.9f), ICON_IGFD_FILE);
+
+// define style for all links
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByTypeLink, "", ImVec4(0.5f, 1.0f, 0.9f, 0.9f));
+// can be for a specific link
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByTypeLink, "Readme.md", ImVec4(0.5f, 1.0f, 0.9f, 0.9f));
+
+// define style for any files/dirs/links by fullname
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByFullName, "doc", ImVec4(0.9f, 0.2f, 0.0f, 0.9f), ICON_IGFD_FILE_PIC);
+
+// define style by file who are containing this string
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByContainedInFullName, ".git", ImVec4(0.9f, 0.2f, 0.0f, 0.9f), ICON_IGFD_BOOKMARK);
+
+all of theses can be miwed with IGFD_FileStyleByTypeDir / IGFD_FileStyleByTypeFile / IGFD_FileStyleByTypeLink
+like theses by ex :
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByTypeDir | IGFD_FileStyleByContainedInFullName, ".git", ImVec4(0.9f, 0.2f, 0.0f, 0.9f), ICON_IGFD_BOOKMARK);
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByTypeFile | IGFD_FileStyleByFullName, "cmake", ImVec4(0.5f, 0.8f, 0.5f, 0.9f), ICON_IGFD_SAVE);
+```
+
+this sample code of [master/main.cpp](https://github.com/aiekick/ImGuiFileDialog/blob/master/main.cpp) produce the picture above :
+
+```cpp
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtention, ".cpp", ImVec4(1.0f, 1.0f, 0.0f, 0.9f));
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtention, ".h", ImVec4(0.0f, 1.0f, 0.0f, 0.9f));
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtention, ".hpp", ImVec4(0.0f, 0.0f, 1.0f, 0.9f));
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtention, ".md", ImVec4(1.0f, 0.0f, 1.0f, 0.9f));
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtention, ".png", ImVec4(0.0f, 1.0f, 1.0f, 0.9f), ICON_IGFD_FILE_PIC); // add an icon for the filter type
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtention, ".gif", ImVec4(0.0f, 1.0f, 0.5f, 0.9f), "[GIF]"); // add an text for a filter type
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByTypeDir, nullptr, ImVec4(0.5f, 1.0f, 0.9f, 0.9f), ICON_IGFD_FOLDER); // for all dirs
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByTypeFile, "CMakeLists.txt", ImVec4(0.1f, 0.5f, 0.5f, 0.9f), ICON_IGFD_ADD);
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByFullName, "doc", ImVec4(0.9f, 0.2f, 0.0f, 0.9f), ICON_IGFD_FILE_PIC);
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByTypeDir | IGFD_FileStyleByContainedInFullName, ".git", ImVec4(0.9f, 0.2f, 0.0f, 0.9f), ICON_IGFD_BOOKMARK);
+ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByTypeFile | IGFD_FileStyleByContainedInFullName, ".git", ImVec4(0.5f, 0.8f, 0.5f, 0.9f), ICON_IGFD_SAVE);
 ```
 
 ![alt text](https://github.com/aiekick/ImGuiFileDialog/blob/master/doc/color_filter.png)
 
-ImGuiFileDialog accepts icon font macros as well as text tags for file types. See [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders) for a widely used Dear Imgui icon font helper or with [ImGuIFontStudio](https://github.com/aiekick/ImGuiFontStudio) (a gui tool for easily doing the same as IconFontCppHeaders)
-
-```cpp
-// add an icon for png files 
-ImGuiFileDialog::Instance()->SetExtentionInfos(".png", ImVec4(0,1,1,0.9), ICON_IMFDLG_FILE_TYPE_PIC);
-// add a text for gif files (the default value is [File] 
-ImGuiFileDialog::Instance()->SetExtentionInfos(".gif", ImVec4(0, 1, 0.5, 0.9), "[GIF]");
-```
-
-![alt text](https://github.com/aiekick/ImGuiFileDialog/blob/master/doc/filter_Icon.png)
-
-## Filter Collections 
+## Filter Collections
 
 You can define a custom filter name that corresponds to a group of filters using this syntax:
 
 ```custom_name1{filter1,filter2,filter3},custom_name2{filter1,filter2},filter1```
 
-When you select custom_name1, filters 1 to 3 will be applied. The characters `{` and `}` are reserved. Don't use them for filter names.
+When you select custom_name1, filters 1 to 3 will be applied. The characters `{` and `}` are reserved. Don't use them
+for filter names.
 
 this code :
+
 ```cpp
 const char *filters = "Source files (*.cpp *.h *.hpp){.cpp,.h,.hpp},Image files (*.png *.gif *.jpg *.jpeg){.png,.gif,.jpg,.jpeg},.md";
 ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", ICON_IMFDLG_FOLDER_OPEN " Choose a File", filters, ".");
 ```
+
 will produce :
 ![alt text](https://github.com/aiekick/ImGuiFileDialog/blob/master/doc/collectionFilters.gif)
 
 ## Multi Selection
 
 You can define in OpenDialog/OpenModal call the count file you want to select :
+
 - 0 => infinite
 - 1 => one file only (default)
 - n => n files only
@@ -257,42 +329,43 @@ ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey", ImGuiWindowFlags_NoColl
 
 ## Detail View Mode
 
-You can have tables display like that.
+Dear ImGui just released an improved table API. If your downloaded version of Dear ImGui includes the beta version of
+table support (included for some time now) you can enable table support by uncommenting `#define USE_IMGUI_TABLES` in
+you custom config file (CustomImGuiFileDialogConfig.h)
 
-- uncomment "#define USE_IMGUI_TABLES" in you custom config file (CustomImGuiFileDialogConfig.h in this example)
-- will be used by default when ImGui Table will be released in master
+If your version of Dear ImGui has finalized tables support, it will be enabled by default.
 ![alt text](https://github.com/aiekick/ImGuiFileDialog/blob/master/doc/imgui_tables_branch.gif)
 
 ## Exploring by keys
 
-you can activate this feature by uncomment : "#define USE_EXPLORATION_BY_KEYS" 
-in you custom config file (CustomImGuiFileDialogConfig.h in this example)
+You can activate this feature by uncommenting `#define USE_EXPLORATION_BY_KEYS`
+in your custom config file (CustomImGuiFileDialogConfig.h)
 
-you can also uncomment the next lines for define your keys :
+You can also uncomment the next lines to define navigation keys:
 
 * IGFD_KEY_UP => Up key for explore to the top
 * IGFD_KEY_DOWN => Down key for explore to the bottom
 * IGFD_KEY_ENTER => Enter key for open directory
 * IGFD_KEY_BACKSPACE => BackSpace for comming back to the last directory
 
-you can also explore a file list by use the current key char.
+You can also jump to a point in the file list by pressing the corresponding key of the first filename character.
 
 ![alt text](https://github.com/aiekick/ImGuiFileDialog/blob/master/doc/explore_ny_keys.gif)
 
-as you see the current item is flashed (by default for 1 sec)
-you can define the flashing life time by yourself with the function
+As you see the current item is flashed by default for 1 second. You can define the flashing lifetime with the function
+
 ```cpp
 ImGuiFileDialog::Instance()->SetFlashingAttenuationInSeconds(1.0f);
 ```
+
 ## Bookmarks
 
-you can create/edit/call path bookmarks and load/save them in file
+You can create/edit/call path bookmarks and load/save them.
 
-you can activate it by uncomment : "#define USE_BOOKMARK"
+Activate this feature by uncommenting: `#define USE_BOOKMARK` in your custom config file (CustomImGuiFileDialogConfig.h)
 
-in you custom config file (CustomImGuiFileDialogConfig.h in this example)
+More customization options:
 
-you can also uncomment the next lines for customize it :
 ```cpp
 #define bookmarkPaneWith 150.0f => width of the bookmark pane
 #define IMGUI_TOGGLE_BUTTON ToggleButton => customize the Toggled button (button stamp must be : (const char* label, bool *toggle)
@@ -302,36 +375,39 @@ you can also uncomment the next lines for customize it :
 #define removeBookmarkButtonString "-" => the button for remove the selected bookmark
 ```
 
-* you can select each bookmark for edit the displayed name corresponding to a path
-* you must double click on the label for apply the bookmark 
+* You can select each bookmark to edit the displayed name corresponding to a path
+* Double-click on the label to apply the bookmark
 
 ![bookmarks.gif](https://github.com/aiekick/ImGuiFileDialog/blob/master/doc/bookmarks.gif)
 
-you can also serialize/deserialize bookmarks by ex for load/save from/to file : (check the app sample by ex)
+You can also serialize/deserialize bookmarks (for example to load/save from/to a file):
 ```cpp
 Load => ImGuiFileDialog::Instance()->DeserializeBookmarks(bookmarString);
 Save => std::string bookmarkString = ImGuiFileDialog::Instance()->SerializeBookmarks();
 ```
+(please see example code for details)
 
 ## Path Edition :
 
 Right clicking on any path element button allows the user to manually edit the path from that portion of the tree.
-Pressing the completion key (GLFW uses `enter` by default) validates the new path.
-Pressing the cancel key (GLFW uses`escape` by default) cancels the manual entry and restores the original path.
+Pressing the completion key (GLFW uses `enter` by default) validates the new path. Pressing the cancel key (GLFW
+uses`escape` by default) cancels the manual entry and restores the original path.
 
 Here's the manual entry operation in action:
 ![inputPathEdition.gif](https://github.com/aiekick/ImGuiFileDialog/blob/master/doc/inputPathEdition.gif)
 
 ## Confirm Overwrite Dialog :
 
-If you want avoid overwriting files after selection, ImGuiFileDialog can show a dialog to confirm or cancel the operation.
+If you want avoid overwriting files after selection, ImGuiFileDialog can show a dialog to confirm or cancel the
+operation.
 
 To do so, define the flag ImGuiFileDialogFlags_ConfirmOverwrite in your call to OpenDialog/OpenModal.
 
-By default this flag is not set since there is no pre-defined way to 
-define if a dialog will be for Open or Save behavior. (by design! :) )
+By default this flag is not set since there is no pre-defined way to define if a dialog will be for Open or Save
+behavior. (by design! :) )
 
 Example code For Standard Dialog :
+
 ```cpp
 ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey",
     ICON_IGFD_SAVE " Choose a File", filters,
@@ -339,6 +415,7 @@ ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey",
 ```
 
 Example code For Modal Dialog :
+
 ```cpp
 ImGuiFileDialog::Instance()->OpenModal("ChooseFileDlgKey",
     ICON_IGFD_SAVE " Choose a File", filters,
@@ -346,13 +423,14 @@ ImGuiFileDialog::Instance()->OpenModal("ChooseFileDlgKey",
 ```
 
 This dialog will only verify the file in the file field, not with `GetSelection()`.
- 
-The confirmation dialog will be a non-movable modal (input blocking) dialog displayed
-in the middle of the current ImGuiFileDialog window.
+
+The confirmation dialog will be a non-movable modal (input blocking) dialog displayed in the middle of the current
+ImGuiFileDialog window.
 
 As usual, you can customize the dialog in your custom config file (CustomImGuiFileDialogConfig.h in this example)
 
 Uncomment these line for customization options:
+
 ```cpp
 //#define OverWriteDialogTitleString "The file Already Exist !"
 //#define OverWriteDialogMessageString "Would you like to OverWrite it ?"
@@ -366,8 +444,8 @@ See the result :
 
 ## Open / Save dialog Behavior :
 
-ImGuiFileDialog uses the same code internally for Open and Save dialogs. To distinguish between them access the 
-various data return functions depending on what the dialog is doing.
+ImGuiFileDialog uses the same code internally for Open and Save dialogs. To distinguish between them access the various
+data return functions depending on what the dialog is doing.
 
 When selecting an existing file (for example, a Load or Open dialog), use
 
@@ -385,27 +463,102 @@ std::string GetCurrentPath();                      // Returns current path only
 std::string GetCurrentFilter();                    // The file extension
 ```
 
+## Thumbnails Display
+
+You can now, display thumbnails of pictures.
+
+![thumbnails.gif](https://github.com/aiekick/ImGuiFileDialog/blob/master/doc/thumbnails.gif)
+
+The file resize use stb/image so the following files extentions are supported :
+ * .png (tested sucessfully)
+ * .bmp (tested sucessfully)
+ * .tga (tested sucessfully)
+ * .jpg (tested sucessfully)
+ * .jpeg (tested sucessfully)
+ * .gif (tested sucessfully_ but not animation just first frame)
+ * .psd (not tested)
+ * .pic (not tested)
+ * .ppm (not tested)
+ * .pgm (not tested)
+
+Corresponding to your backend (ex : OpenGl) you need to define two callbacks :
+* the first is a callback who will be called by ImGuiFileDialog for create the backend texture
+* the second is a callback who will be called by ImGuiFileDialog for destroy the backend texture
+
+After that you need to call the function who is responsible to create / destroy the textures.
+this function must be called in your GPU Rendering zone for avoid destroying of used texture.
+if you do that at the same place of your imgui code, some backend can crash your app, by ex with vulkan.
+
+ex, for opengl :
+
+```cpp
+// Create thumbnails texture
+ImGuiFileDialog::Instance()->SetCreateThumbnailCallback([](IGFD_Thumbnail_Info *vThumbnail_Info) -> void
+{
+	if (vThumbnail_Info && 
+		vThumbnail_Info->isReadyToUpload && 
+		vThumbnail_Info->textureFileDatas)
+	{
+		GLuint textureId = 0;
+		glGenTextures(1, &textureId);
+		vThumbnail_Info->textureID = (void*)textureId;
+
+		glBindTexture(GL_TEXTURE_2D, textureId);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+			(GLsizei)vThumbnail_Info->textureWidth, (GLsizei)vThumbnail_Info->textureHeight, 
+			0, GL_RGBA, GL_UNSIGNED_BYTE, vThumbnail_Info->textureFileDatas);
+		glFinish();
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		delete[] vThumbnail_Info->textureFileDatas;
+		vThumbnail_Info->textureFileDatas = nullptr;
+
+		vThumbnail_Info->isReadyToUpload = false;
+		vThumbnail_Info->isReadyToDisplay = true;
+	}
+});
+```
+
+```cpp
+// Destroy thumbnails texture
+ImGuiFileDialog::Instance()->SetDestroyThumbnailCallback([](IGFD_Thumbnail_Info* vThumbnail_Info)
+{
+	if (vThumbnail_Info)
+	{
+		GLuint texID = (GLuint)vThumbnail_Info->textureID;
+		glDeleteTextures(1, &texID);
+		glFinish();
+	}
+});
+```
+
+```cpp
+// GPU Rendering Zone // To call for Create/ Destroy Textures
+ImGuiFileDialog::Instance()->ManageGPUThumbnails();
+```
 
 ## How to Integrate ImGuiFileDialog in your project
 
-### ImGuiFileDialog require :
-
-* [ImGui](https://github.com/ocornut/imgui/blob/master) (with/without tables widgets)
-* [dirent v1.23](https://github.com/tronkko/dirent/tree/v1.23) lib, only for windows. already placed in the directory
-
 ### Customize ImGuiFileDialog :
 
-You can customize many aspects of ImGuiFileDialog by overriding `ImGuiFileDialogConfig.h`. 
+You can customize many aspects of ImGuiFileDialog by overriding `ImGuiFileDialogConfig.h`.
 
-To enable your customizations, define the preprocessor directive CUSTOM_IMGUIFILEDIALOG_CONFIG with the path of your custom config file.
-This path must be relative to the directory where you put the ImGuiFileDialog module.
+To enable your customizations, define the preprocessor directive CUSTOM_IMGUIFILEDIALOG_CONFIG with the path of your
+custom config file. This path must be relative to the directory where you put the ImGuiFileDialog module.
 
 This operation is demonstrated in `CustomImGuiFileDialog.h` in the example project to:
+
 * Have a custom icon font instead of labels for buttons or message titles
 * Customize the button text (the button call signature must be the same, by the way! :)
 
-The Custom Icon Font (in [CustomFont.cpp](CustomFont.cpp) and [CustomFont.h](CustomFont.h)) was made with [ImGuiFontStudio](https://github.com/aiekick/ImGuiFontStudio) i wrote for that :)
-ImGuiFontStudio is using also ImGuiFileDialog.
+The custom icon font used in the example code ([CustomFont.cpp](CustomFont.cpp) and [CustomFont.h](CustomFont.h)) was made
+with [ImGuiFontStudio](https://github.com/aiekick/ImGuiFontStudio), which I wrote. :)
+
+ImGuiFontStudio uses ImGuiFileDialog! Check it out.
 
 ## Api's C/C++ :
 
@@ -530,7 +683,7 @@ std::string GetCurrentPath();                      // will return current path
 std::string GetCurrentFilter();                    // will return selected filter
 UserDatas GetUserDatas();                          // will return user datas send with Open Dialog/Modal
         
-           // extentions displaying
+// extentions displaying
 void SetExtentionInfos(                            // SetExtention datas for have custom display of particular file type
     const std::string& vFilter,                    // extention filter to tune
     const FileExtentionInfosStruct& vInfos);       // Filter Extention Struct who contain Color and Icon/Text for the display of the file with extention filter
@@ -552,6 +705,11 @@ feature : USE_BOOKMARK
 std::string SerializeBookmarks();                  // serialize bookmarks : return bookmark buffer to save in a file
 void DeserializeBookmarks(                         // deserialize bookmarks : load bookmar buffer to load in the dialog (saved from previous use with SerializeBookmarks())
     const std::string& vBookmarks);                // bookmark buffer to load
+
+feature : USE_THUMBNAILS
+void SetCreateThumbnailCallback(const CreateThumbnailFun vCreateThumbnailFun);		// define the texture creation callback
+void SetDestroyThumbnailCallback(const DestroyThumbnailFun vCreateThumbnailFun);	// define the texture destroy callback
+void ManageGPUThumbnails();															// in gpu rendering zone, whill create or destroy textures
 ```
 
 ### C Api
@@ -755,4 +913,16 @@ feature : USE_BOOKMARK
     IMGUIFILEDIALOG_API void IGFD_DeserializeBookmarks(                 // deserialize bookmarks : load bookmar buffer to load in the dialog (saved from previous use with SerializeBookmarks())
         ImGuiFileDialog* vContext,                                      // ImGuiFileDialog context 
         const char* vBookmarks);                                        // bookmark buffer to load 
+
+feature : USE_THUMBNAILS
+	IMGUIFILEDIALOG_API void SetCreateThumbnailCallback(				// define the callback for create the thumbnails texture
+		ImGuiFileDialog* vContext,										// ImGuiFileDialog context 
+		const IGFD_CreateThumbnailFun vCreateThumbnailFun);				// the callback for create the thumbnails texture
+
+	IMGUIFILEDIALOG_API void SetDestroyThumbnailCallback(				// define the callback for destroy the thumbnails texture
+		ImGuiFileDialog* vContext,										// ImGuiFileDialog context 
+		const IGFD_DestroyThumbnailFun vDestroyThumbnailFun);			// the callback for destroy the thumbnails texture
+
+	IMGUIFILEDIALOG_API void ManageGPUThumbnails(						// must be call in gpu zone, possibly a thread, will call the callback for create / destroy the textures
+		ImGuiFileDialog* vContext);										// ImGuiFileDialog context 
 ```
