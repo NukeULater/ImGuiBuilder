@@ -4,7 +4,12 @@
 // Windows IMPORTS
 // ===========================
 
+#define WIN32_LEAN_AND_MEAN 
 #include <Windows.h>
+
+// ===========================
+// Standard C++ IMPORTS
+// ===========================
 #include <iostream>
 #include <string>
 #include <vector>
@@ -24,14 +29,9 @@
 // ===========================
 
 #ifndef _OPENGL2
-	#include <GL/gl3w.h>
+#include <GL/gl3w.h>
 #endif
 #include <GLFW/glfw3.h>
-
-// ===========================
-// OPENGL Framework /
-// ===========================
-
 
 // ===========================
 // IMGUI Framework

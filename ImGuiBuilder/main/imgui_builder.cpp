@@ -1,4 +1,5 @@
-#include "../header.h"
+#include "pch.h"
+
 #include "imgui_builder.h"
 #include "build_config.h"
 #include "additional.h"
@@ -92,8 +93,6 @@ void move_items( std::vector<move_obj>& mto, bool& continue_edt );
 
 imgui_builder::imgui_builder( )
 {
-	
-
 	this->cursor.m_arrow_top_or_bottom				= LoadCursor( NULL, IDC_SIZENS );
 	this->cursor.m_arrow_left_or_right				= LoadCursor( NULL, IDC_SIZEWE );
 	this->cursor.m_arrow_northwest_and_southeast	= LoadCursor( NULL, IDC_SIZENWSE );
@@ -115,7 +114,7 @@ imgui_builder::imgui_builder( )
 void imgui_builder::draw_dialogs_save_open( )
 {
 
-	static std::vector<std::string> dialogs_keys = {
+	static const std::string dialogs_keys[] = {
 		"SaveProjectFileDlgKey",
 		"OpenProjectFileDlgKey",
 		"GenCodeProjectFileDlgKey",
@@ -148,7 +147,7 @@ void imgui_builder::draw_dialogs_save_open( )
 	};
 
 	auto i = 0;
-	for ( auto key : dialogs_keys )
+	for ( auto& key : dialogs_keys )
 	{
 		if ( ImGuiFileDialog::Instance( )->Display( key.c_str(), 32, { 350.f, 300.f } ) )
 		{
@@ -218,16 +217,27 @@ void imgui_builder::draw_dialogs_save_open( )
 
 auto RegeditGetPath ( const std::string& keyname ) -> std::string {
 	HKEY hKey;
-	RegOpenKeyExA( HKEY_CURRENT_USER, NULL, 0, KEY_SET_VALUE, &hKey );
+	LSTATUS lRegOpenResult = RegOpenKeyExA( HKEY_CURRENT_USER, NULL, 0, KEY_SET_VALUE, &hKey );
 
-	char buffer[ MAX_PATH ];
-	DWORD dwBufferSize = sizeof( buffer );
+	if (lRegOpenResult != ERROR_SUCCESS)
+	{
+		std::cout << __FUNCTIONW__ ": error " << lRegOpenResult << " when RegOpenKeyExA()\n";
+		return "";
+	}
 
-	auto status = RegQueryValueExA( hKey, keyname.c_str( ), NULL, NULL, (LPBYTE)buffer, &dwBufferSize );
+	char buffer[MAX_PATH];
+	DWORD dwBufferSize = sizeof(buffer);
 
-	RegCloseKey( hKey );
+	auto lRegQueryValueResult = RegQueryValueExA(hKey, keyname.c_str(), NULL, NULL, (LPBYTE)buffer, &dwBufferSize);
+	if (lRegQueryValueResult != ERROR_SUCCESS)
+	{
+		std::cout << __FUNCTION__ ": error " << lRegQueryValueResult << " when RegQueryValueExA()\n";
+		return "";
+	}
 
-	return std::string( buffer );
+	RegCloseKey(hKey);
+
+	return std::string(buffer);
 }
 
 /// <summary>
@@ -842,7 +852,7 @@ void imgui_builder::show_form( )
 			if ( show_context && ImGui::BeginPopupContextItem( "##obj_context" ) )
 			{
 				//style.ButtonTextAlign
-				auto& g = *GImGui;
+				auto& g = *ImGui::GetCurrentContext();
 				auto backup1_y = g.Style.ButtonTextAlign.y;
 				auto backup2_y = g.Style.FramePadding.y;
 				g.Style.FramePadding.y = -1.3f;
@@ -1129,7 +1139,7 @@ void imgui_builder::render_obj( basic_obj& obj, int current_form_id )
 
 	auto relative_for_resize = []( basic_obj& obj ) -> float
 	{ 
-		auto&		g			= *GImGui;
+		auto&		g			= *ImGui::GetCurrentContext();
 		auto*		window		= g.CurrentWindow;
 		const auto&	style		= g.Style;
 		const auto	id			= window->GetID( obj.name.c_str( ) );
@@ -1235,7 +1245,7 @@ void imgui_builder::render_obj( basic_obj& obj, int current_form_id )
 	if ( show_context && ImGui::BeginPopupContextItem( "##obj_context" ) )
 	{
 		//style.ButtonTextAlign
-		auto& g = *GImGui;
+		auto& g = *ImGui::GetCurrentContext();
 		auto backup1_y = g.Style.ButtonTextAlign.y;
 		auto backup2_y = g.Style.FramePadding.y;
 		g.Style.FramePadding.y		= -1.3f;
@@ -1496,6 +1506,7 @@ void imgui_builder::object_property( )
 
 void imgui_builder::routine_draw( )
 {
+	// TODO: replace with Singleton
 	static imgui_builder* instance = nullptr;
 	if ( !instance )
 		instance = new imgui_builder( );

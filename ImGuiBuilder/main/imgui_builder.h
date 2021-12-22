@@ -1,9 +1,9 @@
 #pragma once
+
 #include "structs.hpp"
 class imgui_builder
 {
 private:
-
 
 	int						m_id				= -1;
 	int						m_child_id			= -1; 

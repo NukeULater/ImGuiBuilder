@@ -6,9 +6,9 @@ namespace im_config
 {
 	namespace window_flags
 	{
-		bool save( std::string style, ImGuiStyle custom_gui_style );
-		bool load( std::string style, ImGuiStyle& custom_gui_style );
-		void to_clipboard( ImGuiStyle& custom_gui_style );
+		bool save( const std::string& style, ImGuiStyle custom_gui_style );
+		bool load( const std::string& style, ImGuiStyle& custom_gui_style );
+		void to_clipboard( const ImGuiStyle& custom_gui_style );
 	}
 
 	namespace color
@@ -21,8 +21,8 @@ namespace im_config
 
 	namespace controls
 	{
-		bool save( std::string& file, std::vector<form> forms, std::vector<basic_obj> objs );
-		bool load( std::string& file, std::vector<form>& forms, std::vector<basic_obj>& objs, int* the_ids );
-		bool create_code( std::string file_name, std::vector<form> forms, std::vector<basic_obj> objs );
+		bool save( const std::string& file, const std::vector<form>& forms, const std::vector<basic_obj>& objs );
+		bool load( const std::string& file, std::vector<form>& forms, std::vector<basic_obj>& objs, int* the_ids );
+		bool create_code( const std::string& file_name, const std::vector<form>& forms, const std::vector<basic_obj>& objs );
 	}
 }

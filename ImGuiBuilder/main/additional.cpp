@@ -1,4 +1,5 @@
-#include "../header.h"
+#include "pch.h"
+
 #include "additional.h"
 
 int InputTextCallback( ImGuiInputTextCallbackData* data )
@@ -44,7 +45,7 @@ void ImGui::ToggleButton( const char* str_id, bool* v )
 }
 
 
-void ImGui::PushAllColorsDark( ImGuiStyle dark )
+void ImGui::PushAllColorsDark( const ImGuiStyle& dark )
 {
 	auto& style = ImGui::GetStyle( );
 
@@ -89,7 +90,7 @@ void ImGui::PushAllColorsDark( ImGuiStyle dark )
 	style.DisplaySafeAreaPadding = dark.DisplaySafeAreaPadding;
 }
 
-void ImGui::PushAllColorsCustom( ImGuiStyle custom_gui_style )
+void ImGui::PushAllColorsCustom( const ImGuiStyle& custom_gui_style )
 {
 	auto& style = ImGui::GetStyle( );
 	//style.Colors = custom_gui_style.Colors;

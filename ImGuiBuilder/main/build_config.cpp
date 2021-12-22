@@ -1,4 +1,5 @@
-#include "../header.h"
+#include "pch.h"
+
 #include "build_config.h"
 #include "../utils/utils.h"
 #include <sys/stat.h>
@@ -12,7 +13,7 @@ bool CheckFileExists( std::string path )
 	return ( stat( path.c_str( ), &buffer ) == 0 );
 }
 
-void im_config::window_flags::to_clipboard( ImGuiStyle& custom_gui_style )
+void im_config::window_flags::to_clipboard( const ImGuiStyle& custom_gui_style )
 {
 	ImGui::LogToClipboard( );
 
@@ -70,7 +71,7 @@ void im_config::window_flags::to_clipboard( ImGuiStyle& custom_gui_style )
 	ImGui::LogFinish( );
 }
 
-bool im_config::window_flags::save( std::string style, ImGuiStyle custom_gui_style )
+bool im_config::window_flags::save( const std::string& style, ImGuiStyle custom_gui_style )
 {
 	std::ofstream f_save;
 	f_save.open( style );
@@ -117,7 +118,7 @@ bool im_config::window_flags::save( std::string style, ImGuiStyle custom_gui_sty
 	return CheckFileExists( style );
 }
 
-bool im_config::window_flags::load( std::string style, ImGuiStyle& custom_gui_style )
+bool im_config::window_flags::load( const std::string& style, ImGuiStyle& custom_gui_style )
 {
 	std::ifstream r_file( style );
 	std::string line;
@@ -283,7 +284,6 @@ bool im_config::color::save( std::string style, ImGuiStyle custom_gui_style )
 
 bool im_config::color::load( std::string style, ImGuiStyle& custom_gui_style )
 {
-
 	std::ifstream file_import( style );
 
 	if ( file_import.is_open( ) )
@@ -307,7 +307,7 @@ bool im_config::color::load( std::string style, ImGuiStyle& custom_gui_style )
 	return false;
 }
 
-bool im_config::controls::create_code( std::string file_name, std::vector<form> forms, std::vector<basic_obj> objs )
+bool im_config::controls::create_code( const std::string& file_name, const std::vector<form>& forms, const std::vector<basic_obj>& objs )
 {
 	static int fctn = 0;
 	std::string file_builder = " /* GENERATED WITH IMGUI BUILDER :) HAS " + std::to_string(objs.size()) + " Objs & " + std::to_string(forms.size()) + " forms */\n\n\n";
@@ -347,11 +347,11 @@ bool im_config::controls::create_code( std::string file_name, std::vector<form> 
 		int item_onchil = 0;
 		int cout_child = -1;
 		std::vector<int> xild;
-		for (auto b : form.child)
+		for (auto& b : form.child)
 		{
 			cout_child = b.id;
 			item_onchil = 0;
-			for (auto i : objs)
+			for (auto& i : objs)
 			{
 				if (i.child == b.id)
 					item_onchil++;
@@ -501,7 +501,7 @@ bool im_config::controls::create_code( std::string file_name, std::vector<form> 
 	return CheckFileExists( file_name );
 }
 
-bool im_config::controls::load( std::string& file, std::vector<form> & forms, std::vector<basic_obj> & objs, int * last_ids )
+bool im_config::controls::load( const std::string& file, std::vector<form>& forms, std::vector<basic_obj>& objs, int * last_ids )
 {
 	if ( !last_ids ) return false;
 
@@ -600,7 +600,7 @@ bool im_config::controls::load( std::string& file, std::vector<form> & forms, st
 	return false;
 }
 
-bool im_config::controls::save( std::string& file, std::vector<form> forms, std::vector<basic_obj> objs )
+bool im_config::controls::save( const std::string& file, const std::vector<form>& forms, const std::vector<basic_obj>& objs )
 {
 	remove( file.c_str( ) );
 	std::ofstream f_write( file );

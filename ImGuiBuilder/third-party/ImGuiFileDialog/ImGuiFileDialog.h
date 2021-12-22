@@ -620,7 +620,7 @@ namespace IGFD
 
 		std::string dlg_key;
 		std::string dlg_title;
-		std::string dlg_filters{};
+		std::string dlg_filters;
 		std::string dlg_path;
 		std::string dlg_defaultFileName;
 		std::string dlg_defaultExt;

@@ -1,24 +1,24 @@
-#include "../header.h"
-#include "the_window.h"
+#include "pch.h"
 
+#include "the_window.h"
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
+
+window* window::window_instance = nullptr;
 
 void glfw_error_callback( int error, const char* description )
 {
 	fprintf( stderr, "Glfw Error %d: %s\n", error, description );
 }
 
-window* c_window = nullptr;
-
 /// <summary>
 /// creation builder window
 /// </summary>
 window::window( void* func_draw ) : m_func_draw( func_draw )
 {
-	c_window = this;
+	window_instance = this;
 
 //#ifndef _DEBUG
 //	ShowWindow( GetConsoleWindow( ), 0 );
@@ -109,9 +109,8 @@ bool window::pressed_bind_keys( int key_1, int key_2 )
 /// <returns>current instance </returns>
 window* window::i( )
 {
-	return c_window;
+	return window_instance;
 }
-
 
 POINT window::get_relative_cursor_pos( )
 {

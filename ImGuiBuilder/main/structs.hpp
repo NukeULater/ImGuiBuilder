@@ -1,7 +1,7 @@
 #pragma once
 
 
-enum type_obj
+enum class type_obj
 {
 	button = 1,
 	label,

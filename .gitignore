@@ -26,3 +26,5 @@
 *.exp
 *.lib
 *.lib
+*.i
+*.pch

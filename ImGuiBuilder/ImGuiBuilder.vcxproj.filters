@@ -57,9 +57,6 @@
     <ClCompile Include="third-party\ImGui\opengl\imgui_impl_glfw.cpp">
       <Filter>third-party\ImGui\opengl</Filter>
     </ClCompile>
-    <ClCompile Include="third-party\ImGui\opengl\imgui_impl_opengl2.cpp">
-      <Filter>third-party\ImGui\opengl</Filter>
-    </ClCompile>
     <ClCompile Include="third-party\ImGui\opengl\imgui_impl_opengl3.cpp">
       <Filter>third-party\ImGui\opengl</Filter>
     </ClCompile>
@@ -79,6 +76,7 @@
     <ClCompile Include="third-party\ImGuiFileDialog\ImGuiFileDialog.cpp">
       <Filter>third-party\ImGuiFileDialog</Filter>
     </ClCompile>
+    <ClCompile Include="pch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main\imgui_builder.h">
@@ -120,9 +118,6 @@
     <ClInclude Include="third-party\ImGui\opengl\imgui_impl_glfw.h">
       <Filter>third-party\ImGui\opengl</Filter>
     </ClInclude>
-    <ClInclude Include="third-party\ImGui\opengl\imgui_impl_opengl2.h">
-      <Filter>third-party\ImGui\opengl</Filter>
-    </ClInclude>
     <ClInclude Include="third-party\ImGui\opengl\imgui_impl_opengl3.h">
       <Filter>third-party\ImGui\opengl</Filter>
     </ClInclude>
@@ -131,9 +126,6 @@
     </ClInclude>
     <ClInclude Include="main\the_window.h">
       <Filter>main</Filter>
-    </ClInclude>
-    <ClInclude Include="header.h">
-      <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="main\additional.h">
       <Filter>main</Filter>
@@ -150,5 +142,6 @@
     <ClInclude Include="third-party\ImGuiFileDialog\ImGuiFileDialogConfig.h">
       <Filter>third-party\ImGuiFileDialog</Filter>
     </ClInclude>
+    <ClInclude Include="pch.h" />
   </ItemGroup>
 </Project>
