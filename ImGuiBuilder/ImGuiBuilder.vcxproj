@@ -243,6 +243,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='OpenGL2|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="third-party\ImGui\imgui_stdlib.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='OpenGL2|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="third-party\ImGui\imgui_tables.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
@@ -286,6 +291,7 @@
     <ClInclude Include="third-party\ImGui\imconfig.h" />
     <ClInclude Include="third-party\ImGui\imgui.h" />
     <ClInclude Include="third-party\ImGui\imgui_internal.h" />
+    <ClInclude Include="third-party\ImGui\imgui_stdlib.h" />
     <ClInclude Include="third-party\ImGui\imstb_rectpack.h" />
     <ClInclude Include="third-party\ImGui\imstb_textedit.h" />
     <ClInclude Include="third-party\ImGui\imstb_truetype.h" />

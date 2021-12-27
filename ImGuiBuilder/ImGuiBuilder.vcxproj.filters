@@ -78,6 +78,7 @@
     </ClCompile>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="third-party\ImGui\imgui_demo.cpp" />
+    <ClCompile Include="third-party\ImGui\imgui_stdlib.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main\imgui_builder.h">
@@ -145,5 +146,6 @@
     </ClInclude>
     <ClInclude Include="pch.h" />
     <ClInclude Include="third-party\ImGui\opengl\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="third-party\ImGui\imgui_stdlib.h" />
   </ItemGroup>
 </Project>

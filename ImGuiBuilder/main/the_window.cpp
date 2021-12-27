@@ -2,10 +2,7 @@
 
 #include "the_window.h"
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
-#pragma comment(lib, "legacy_stdio_definitions")
-#endif
-
+// TODO Singleton
 window* window::window_instance = nullptr;
 
 void glfw_error_callback( int error, const char* description )
@@ -24,6 +21,7 @@ window::window( void* func_draw ) : m_func_draw( func_draw )
 //	ShowWindow( GetConsoleWindow( ), 0 );
 //#endif // !_DEBUG
 
+	// Replaced by ImGui loader
 	glfwSetErrorCallback( glfw_error_callback );
 	if ( !glfwInit( ) )
 		return;

@@ -445,6 +445,9 @@ void imgui_builder::draw( )
 	if ( m_font_menu )
 		form_font_editor( );
 
+	if (m_imgui_demo)
+		ImGui::ShowDemoWindow(&m_imgui_demo);
+
 	paste_obj( );
 
 	ImGui::SetNextWindowSize( { static_cast<float>( width - 16 ), 100 } );
@@ -486,6 +489,11 @@ void imgui_builder::draw( )
 
 			ImGui::EndMenu( );
 		}
+		if ( !m_imgui_demo && ImGui::Button( "ImGui Demo" ) )
+		{
+			m_imgui_demo = !m_imgui_demo;
+		}
+
 		ImGui::EndMenuBar( );
 	}
 

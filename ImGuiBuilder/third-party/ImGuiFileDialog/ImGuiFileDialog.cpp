@@ -630,7 +630,7 @@ namespace IGFD
 		//if (!str.empty()) str += "\n";
 		str += vStr;
 		if (len > str.size()) len = str.size();
-#ifdef MSVC
+#ifdef _MSC_VER
 		strncpy_s(vBuffer, vBufferLen, str.c_str(), len);
 #else // MSVC
 		strncpy(vBuffer, str.c_str(), len);
@@ -1735,14 +1735,14 @@ namespace IGFD
 				}
 
 				size_t len = 0;
-#ifdef MSVC
+#ifdef _MSC_VER
 				struct tm _tm;
 				errno_t err = localtime_s(&_tm, &statInfos.st_mtime);
 				if (!err) len = strftime(timebuf, 99, DateTimeFormat, &_tm);
-#else // MSVC
+#else // _MSC_VER
 				struct tm* _tm = localtime(&statInfos.st_mtime);
 				if (_tm) len = strftime(timebuf, 99, DateTimeFormat, _tm);
-#endif // MSVC
+#endif // _MSC_VER
 				if (len)
 				{
 					vInfos->fileModifDate = std::string(timebuf, len);
@@ -4795,10 +4795,10 @@ IMGUIFILEDIALOG_API IGFD_Selection IGFD_GetSelection(ImGuiFileDialog* vContext)
 				{
 					size_t siz = s.first.size() + 1U;
 					pair->fileName = new char[siz];
-#ifndef MSVC
-					strncpy(pair->fileName, s.first.c_str(), siz);
-#else
+#ifdef _MSC_VER
 					strncpy_s(pair->fileName, siz, s.first.c_str(), siz);
+#else
+					strncpy(pair->fileName, s.first.c_str(), siz);
 #endif
 					pair->fileName[siz - 1U] = '\0';
 				}
@@ -4808,10 +4808,10 @@ IMGUIFILEDIALOG_API IGFD_Selection IGFD_GetSelection(ImGuiFileDialog* vContext)
 				{
 					size_t siz = s.first.size() + 1U;
 					pair->filePathName = new char[siz];
-#ifndef MSVC
-					strncpy(pair->filePathName, s.first.c_str(), siz);
-#else
+#ifdef _MSC_VER
 					strncpy_s(pair->filePathName, siz, s.first.c_str(), siz);
+#else
+					strncpy(pair->filePathName, s.first.c_str(), siz);
 #endif
 					pair->filePathName[siz - 1U] = '\0';
 				}
@@ -4835,10 +4835,10 @@ IMGUIFILEDIALOG_API char* IGFD_GetFilePathName(ImGuiFileDialog* vContext)
 		{
 			size_t siz = s.size() + 1U;
 			res = new char[siz];
-#ifndef MSVC
-			strncpy(res, s.c_str(), siz);
-#else
+#ifdef _MSC_VER
 			strncpy_s(res, siz, s.c_str(), siz);
+#else
+			strncpy(res, s.c_str(), siz);
 #endif
 			res[siz - 1U] = '\0';
 		}
@@ -4858,10 +4858,10 @@ IMGUIFILEDIALOG_API char* IGFD_GetCurrentFileName(ImGuiFileDialog* vContext)
 		{
 			size_t siz = s.size() + 1U;
 			res = new char[siz];
-#ifndef MSVC
-			strncpy(res, s.c_str(), siz);
-#else
+#ifdef _MSC_VER
 			strncpy_s(res, siz, s.c_str(), siz);
+#else
+			strncpy(res, s.c_str(), siz);
 #endif
 			res[siz - 1U] = '\0';
 		}
@@ -4881,7 +4881,7 @@ IMGUIFILEDIALOG_API char* IGFD_GetCurrentPath(ImGuiFileDialog* vContext)
 		{
 			size_t siz = s.size() + 1U;
 			res = new char[siz];
-#ifndef MSVC
+#ifdef _MSC_VER
 			strncpy(res, s.c_str(), siz);
 #else
 			strncpy_s(res, siz, s.c_str(), siz);
@@ -4904,10 +4904,10 @@ IMGUIFILEDIALOG_API char* IGFD_GetCurrentFilter(ImGuiFileDialog* vContext)
 		{
 			size_t siz = s.size() + 1U;
 			res = new char[siz];
-#ifndef MSVC
-			strncpy(res, s.c_str(), siz);
-#else
+#ifdef _MSC_VER
 			strncpy_s(res, siz, s.c_str(), siz);
+#else
+			strncpy(res, s.c_str(), siz);
 #endif
 			res[siz - 1U] = '\0';
 		}
@@ -4955,10 +4955,10 @@ IMGUIFILEDIALOG_API bool IGFD_GetFileStyle(ImGuiFileDialog* vContext,
 		{
 			size_t siz = icon.size() + 1U;
 			*vOutIcon = new char[siz];
-#ifndef MSVC
-			strncpy(*vOutIcon, icon.c_str(), siz);
-#else
+#ifdef _MSC_VER
 			strncpy_s(*vOutIcon, siz, icon.c_str(), siz);
+#else
+			strncpy(*vOutIcon, icon.c_str(), siz);
 #endif
 			(*vOutIcon)[siz - 1U] = '\0';
 		}
@@ -5006,10 +5006,10 @@ IMGUIFILEDIALOG_API char* IGFD_SerializeBookmarks(ImGuiFileDialog* vContext)
 		{
 			size_t siz = s.size() + 1U;
 			res = new char[siz];
-#ifndef MSVC
-			strncpy(res, s.c_str(), siz);
-#else
+#ifdef _MSC_VER
 			strncpy_s(res, siz, s.c_str(), siz);
+#else
+			strncpy(res, s.c_str(), siz);
 #endif
 			res[siz - 1U] = '\0';
 		}
