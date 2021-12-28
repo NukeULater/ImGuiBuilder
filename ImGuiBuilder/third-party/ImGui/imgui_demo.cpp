@@ -76,6 +76,7 @@ Index of this file:
 #endif
 
 #include "imgui.h"
+#include "imgui_stdlib.h"
 #ifndef IMGUI_DISABLE
 
 // System includes
@@ -7898,8 +7899,8 @@ typedef int CommandFlags;
 
 enum CommandFlags_
 {
-    CommandFlag_None = 0,
-    //CommandFlag
+    CommandFlag_None   = 0,
+    CommandFlag_Hidden = 1 << 0, // will not display in help commands
 };
 
 // change name, this can be used to execute the command without the console
@@ -7933,223 +7934,229 @@ typedef struct ImGui_Command
     }
 };
 
-std::unordered_map<const char*, ImGui_Command> commands_map;
+std::unordered_map<const char*, ImGui_Command> command_table;
+
+typedef int StringFlags;
+
+enum StringFlags_
+{
+    StringFlag_None,
+    StringFlag_History = 1 << 0, // when going through history with key up/key down, it'll be displayed in the input console
+    StringFlag_CopyToClipboard = 1 << 1, // when set, it'll copy this string to clipboard, then unset the flag
+    StringFlag_End
+};
+
+// pretty much a circular buffer
+// not thread-safe
+typedef class ImGui_StringBuffer
+{
+public:
+    // initial buffer size
+    int default_line_count;
+    size_t default_max_buffer_size_per_line;
+
+    size_t GetDefaultBufferSize() const { return default_line_count * default_max_buffer_size_per_line; }
+
+    typedef struct
+    {
+        size_t offset;
+        size_t size;
+        StringFlags flags;
+    } StringLineHeader;
+
+    std::vector<StringLineHeader> strings_header;
+
+    ImGui_StringBuffer()
+    {
+        // default 256 strings of 256 bytes each
+        // to note default line count isn't that relevant when using dynamic string allocation from the buffer
+        // what does dynamic string allocation mean in this context?
+        // everytime someone tries to pass a string to this buffer
+        // it'll allow the code to append it exactly after the NULL delimiter of the previous string
+        // if the buffer is full, it'll override the first string, but im too lazy rn to fully implement and fix all edge cases this behaviour implies 
+        // so we just use a static lenght buffer for each string, even if it sounds like wasted memory
+        default_line_count = 256;
+        default_max_buffer_size_per_line = 256;
+        s = (char*)IM_ALLOC(GetDefaultBufferSize());
+        buffer_size = GetDefaultBufferSize();
+        last_buffer_position = s;
+        strings_header.reserve(default_line_count);
+    }
+
+    ~ImGui_StringBuffer()
+    {
+        IM_FREE(s);
+        s = NULL;
+        buffer_size = 0;
+        last_buffer_position = NULL;
+        printf("~ImGui_StringBuffer() called\n");
+    }
+
+    void Clear()
+    {
+        strings_header.clear();
+        last_buffer_position = s;
+        last_buffer_position[0] = '\0';
+    }
+
+    void StringBufferSizeIncrease(int newLineCount, size_t newDefaultMaxBufferSizePerLine)
+    {
+        size_t newBufferSize = newLineCount * newDefaultMaxBufferSizePerLine;
+        IM_ASSERT(newBufferSize > buffer_size);
+        int lastPosition = GetUsedBufferSize();
+        char* new_buffer = (char*)IM_ALLOC(newBufferSize);
+        if (s != NULL)
+        {
+            memcpy(new_buffer, s, buffer_size);
+            IM_DELETE(s);
+        }
+        s = new_buffer;
+        buffer_size = newBufferSize;
+        last_buffer_position = &s[lastPosition];
+    }
+
+    /// <summary>
+    /// Add a string entry in the buffer
+    /// </summary>
+    /// <param name="source"></param>
+    /// Source of the string
+    /// <param name="characterCount"></param>
+    /// Character count of the string
+    void AddString(StringFlags flags, const char* source, size_t characterCount = 0)
+    {
+        if (characterCount == 0)
+            characterCount = strnlen_s(source, default_max_buffer_size_per_line - 1);
+
+        IM_ASSERT(characterCount < default_max_buffer_size_per_line - 1 || source[characterCount] == '\0');
+
+        // TODO view comment in constructor
+        //size_t sourceStringSize = characterCount + 1; // + 1 for the NULL
+
+        char* destinationBuffer;
+        size_t destinationBufferSize = AllocateNewLineBuffer(default_max_buffer_size_per_line, &destinationBuffer);
+        // TODO view comment in constructor
+        // size_t destinationBufferSize = AllocateNewLineBuffer(sourceStringSize, &destinationBuffer);
+
+        if (destinationBufferSize > 0)
+        {
+            // position has been updated, copy the source string
+            strncpy_s(destinationBuffer, destinationBufferSize, source, characterCount);
+            destinationBuffer[characterCount] = '\0';
+
+            strings_header.push_back(StringLineHeader{ (size_t)(destinationBuffer - s), destinationBufferSize, flags });
+        }
+        else
+        {
+            // log error
+            // printf("AddString failed, destination buffer size < 0");
+        }
+    }
+
+    void AddStringFmt(StringFlags flags, const char* fmt, ...)
+    {
+        va_list valist;
+        va_start(valist, fmt);
+        int buffer_size_needed = _vsnprintf(NULL, 0, fmt, valist) + 1;
+        if (buffer_size_needed < default_max_buffer_size_per_line)
+        {
+            char* buffer = (char*)_malloca(default_max_buffer_size_per_line);
+            int copied_characters = _vsnprintf(buffer, buffer_size_needed, fmt, valist);
+            AddString(flags, buffer, copied_characters);
+            _freea(buffer);
+        }
+        va_end(valist);
+    }
+
+    const char* GetStringAtIndex(int i) const
+    {
+        IM_ASSERT(i < strings_header.size());
+        auto& string_header = strings_header.at(i);
+        return GetStringAtOffset(string_header.offset);
+    }
+
+    const char* GetStringAtOffset(size_t offset) const
+    {
+        return &s[offset];
+    }
+
+private:
+    // private data
+    char* s; // buffer
+
+    // buffer details
+    size_t buffer_size;
+    // current position of the string
+    char* last_buffer_position;
+
+    /// <summary>
+    /// Gets the size of the buffer and the pointer to the buffer itself
+    /// where to copy the source string
+    /// </summary>
+    /// <param name="sourceStringSize"></param>
+    /// size of the string about to get copied in the circular buffer
+    /// <param name="outDestinationBuf"></param>
+    /// pointer to destination buffer
+    /// <returns></returns>
+    size_t AllocateNewLineBuffer(size_t sourceStringBufferSize, char** outBufferPtr)
+    {
+        if (sourceStringBufferSize > GetBufferSize()) return 0; // we cannot copy this string, buffer too small
+
+        // check if can fit the 'size' in current position remaining buffer
+        bool remainingSpaceAvailable = (GetRemainingBufferSize() / sourceStringBufferSize) >= 1;
+        if (remainingSpaceAvailable)
+        {
+            *outBufferPtr = last_buffer_position;
+            // use current position as the buffer, there's enough space
+            last_buffer_position += sourceStringBufferSize;
+            return sourceStringBufferSize;
+        }
+        else
+        {
+            // then discard the old one
+            last_buffer_position = s;
+
+            auto OffsetInRange = [](size_t lower, size_t upper, size_t offset) -> bool
+            {
+                return lower <= offset && offset <= upper;
+            };
+
+            // clear string range, otherwise we might leave bad string_positions inside the container
+            for (auto& it = strings_header.begin(); it < strings_header.end(); )
+            {
+                if (OffsetInRange((size_t)(last_buffer_position - s), (size_t)((size_t)(last_buffer_position - s) + sourceStringBufferSize), it->offset))
+                {
+                    it = strings_header.erase(it);
+                }
+                else
+                {
+                    it++;
+                }
+            }
+
+            // then attempt one more time
+            return AllocateNewLineBuffer(sourceStringBufferSize, outBufferPtr);
+        }
+    }
+
+    size_t GetBufferSize() const { return buffer_size; }
+
+    /// <summary>
+    /// </summary>
+    size_t GetRemainingBufferSize() const
+    {
+        return GetBufferSize() - GetUsedBufferSize();
+    }
+
+    /// <summary>
+    /// </summary>
+    size_t GetUsedBufferSize() const
+    {
+        return (size_t)(last_buffer_position - s);
+    }
+} ImGui_StringBuffer;
 
 struct ImGui_Console2
 {
-    typedef int StringFlags;
-
-    enum StringFlags_
-    {
-        StringFlag_None,
-        StringFlag_History         = 1 << 0, // when going through history with key up/key down, it'll be displayed in the input console
-        StringFlag_CopyToClipboard = 1 << 1, // when set, it'll copy this string to clipboard, then unset the flag
-        StringFlag_End
-    };
-
-    // pretty much a circular buffer
-    // not thread-safe
-    typedef class ImGui_StringBuffer
-    {
-    public:
-        // initial buffer size
-        int default_line_count;
-        size_t default_max_buffer_size_per_line;
-
-        size_t GetDefaultBufferSize() const { return default_line_count * default_max_buffer_size_per_line; }
-
-        typedef struct
-        {
-            size_t offset;
-            size_t size;
-            StringFlags flags;
-        } StringLineHeader;
-
-        std::vector<StringLineHeader> strings_header;
-
-        ImGui_StringBuffer()
-        {
-            // default 256 strings of 256 bytes each
-            // to note default line count isn't that relevant when using dynamic string allocation from the buffer
-            // what does dynamic string allocation mean in this context?
-            // everytime someone tries to pass a string to this buffer
-            // it'll allow the code to append it exactly after the NULL delimiter of the previous string
-            // if the buffer is full, it'll override the first string, but im too lazy rn to fully implement and fix all edge cases this behaviour implies 
-            // so we just use a static lenght buffer for each string, even if it sounds like wasted memory
-            default_line_count = 256;
-            default_max_buffer_size_per_line = 256;
-            s = (char*)IM_ALLOC(GetDefaultBufferSize());
-            buffer_size = GetDefaultBufferSize();
-            last_buffer_position = s;
-            strings_header.reserve(default_line_count);
-        }
-
-        ~ImGui_StringBuffer()
-        {
-            IM_FREE(s);
-            s = NULL;
-            buffer_size = 0;
-            last_buffer_position = NULL;
-            printf("~ImGui_StringBuffer() called\n");
-        }
-
-        void Clear()
-        {
-            strings_header.clear();
-            last_buffer_position = s;
-            last_buffer_position[0] = '\0';
-        }
-
-        void StringBufferSizeIncrease(int newLineCount, size_t newDefaultMaxBufferSizePerLine)
-        {
-            size_t newBufferSize = newLineCount * newDefaultMaxBufferSizePerLine;
-            IM_ASSERT(newBufferSize > buffer_size);
-            int lastPosition = GetUsedBufferSize();
-            char* new_buffer = (char*)IM_ALLOC(newBufferSize);
-            if (s != NULL)
-            {
-                memcpy(new_buffer, s, buffer_size);
-                IM_DELETE(s);
-            }
-            s = new_buffer;
-            buffer_size = newBufferSize;
-            last_buffer_position = &s[lastPosition];
-        }
-
-        /// <summary>
-        /// Add a string entry in the buffer
-        /// </summary>
-        /// <param name="source"></param>
-        /// Source of the string
-        /// <param name="characterCount"></param>
-        /// Character count of the string
-        void AddString(const char* source, size_t characterCount = 0, StringFlags flags = StringFlag_None)
-        {
-            if (characterCount == 0)
-                characterCount = strnlen_s(source, default_max_buffer_size_per_line - 1);
-
-            // defaultCharactersPerLine because last character will allways be \n
-            IM_ASSERT(characterCount < default_max_buffer_size_per_line - 1 || source[characterCount] == '\0');
-
-            // TODO view comment in constructor
-            //size_t sourceStringSize = characterCount + 1; // + 1 for the NULL
-            
-            char* destinationBuffer;
-            size_t destinationBufferSize = AllocateNewLineBuffer(default_max_buffer_size_per_line, &destinationBuffer);
-            // TODO view comment in constructor
-            // size_t destinationBufferSize = AllocateNewLineBuffer(sourceStringSize, &destinationBuffer);
-
-            if (destinationBufferSize > 0)
-            {
-                // position has been updated, copy the source string
-                strncpy_s(destinationBuffer, destinationBufferSize, source, characterCount);
-                destinationBuffer[characterCount] = '\0';
-
-                strings_header.push_back(StringLineHeader{ (size_t)(destinationBuffer - s), destinationBufferSize, flags });
-            }
-            else
-            {
-                // log error
-                printf("AddString failed, destination buffer size < 0");
-            }
-        }
-
-        void AddStringFmt(const char* fmt, StringFlags flags, ...)
-        {
-            va_list valist;
-            va_start(valist, fmt);
-            int buffer_size_needed =_vsnprintf(NULL, 0, fmt, valist) + 1;
-            if (buffer_size_needed < default_max_buffer_size_per_line)
-            {
-                char* buffer = (char*)_malloca(default_max_buffer_size_per_line);
-                int copied_characters = _vsnprintf(buffer, buffer_size_needed, fmt, valist);
-                AddString(buffer, copied_characters, flags);
-                _freea(buffer);
-            }
-            va_end(valist);
-        }
-
-        const char* GetStringAtOffset(size_t offset)
-        {
-            return &s[offset];
-        }
-
-    private:
-        // private data
-        char* s; // buffer
-        
-        // buffer details
-        size_t buffer_size;
-        // current position of the string
-        char* last_buffer_position;
-
-        /// <summary>
-        /// Gets the size of the buffer and the pointer to the buffer itself
-        /// where to copy the source string
-        /// </summary>
-        /// <param name="sourceStringSize"></param>
-        /// size of the string about to get copied in the circular buffer
-        /// <param name="outDestinationBuf"></param>
-        /// pointer to destination buffer
-        /// <returns></returns>
-        size_t AllocateNewLineBuffer(size_t sourceStringBufferSize, char** outBufferPtr)
-        {
-            if (sourceStringBufferSize > GetBufferSize()) return 0; // we cannot copy this string, buffer too small
-
-            // check if can fit the 'size' in current position remaining buffer
-            bool remainingSpaceAvailable = (GetRemainingBufferSize() / sourceStringBufferSize) >= 1;
-            if (remainingSpaceAvailable)
-            {
-                *outBufferPtr = last_buffer_position;
-                // use current position as the buffer, there's enough space
-                last_buffer_position += sourceStringBufferSize;
-                return sourceStringBufferSize;
-            }
-            else
-            {
-                // then discard the old one
-                last_buffer_position = s;
-
-                auto OffsetInRange = [](size_t lower, size_t upper, size_t offset) -> bool
-                {
-                    return lower <= offset && offset <= upper;
-                };
-
-                // clear string range, otherwise we might leave bad string_positions inside the container
-                for (auto& it = strings_header.begin(); it < strings_header.end(); )
-                {
-                    if (OffsetInRange((size_t)(last_buffer_position - s), (size_t)((size_t)(last_buffer_position - s) + sourceStringBufferSize), it->offset))
-                    {
-                        it = strings_header.erase(it);
-                    }
-                    else
-                    {
-                        it++;
-                    }
-                }
-
-                // then attempt one more time
-                return AllocateNewLineBuffer(sourceStringBufferSize, outBufferPtr);
-            }
-        }
-
-        size_t GetBufferSize() const { return buffer_size; }
-
-        /// <summary>
-        /// </summary>
-        size_t GetRemainingBufferSize() const
-        {
-            return GetBufferSize() - GetUsedBufferSize();
-        }
-
-        /// <summary>
-        /// </summary>
-        size_t GetUsedBufferSize() const
-        {
-            return (size_t)(last_buffer_position - s);
-        }
-    } ImGui_StringBuffer;
-
     // variables
     int                             history_string_index;
     int                             command_index;
@@ -8161,9 +8168,14 @@ struct ImGui_Console2
     ImGui_StringBuffer              output;
     ImGuiTextFilter                 filter;
 
+    float                           console_opacity;
+
     ImGui_Console2() :
         output()
     {
+        auto_scroll = true;
+        scroll_to_botom = false;
+        console_opacity = 0.90f;
         history_string_index = -1;
         command_index = -1;
         memset(input_buffer, 0, sizeof(input_buffer));
@@ -8171,7 +8183,6 @@ struct ImGui_Console2
 
     ~ImGui_Console2()
     {
-        printf("~ImGui_Console2() called\n");
     }
 
     // clear command
@@ -8182,16 +8193,54 @@ struct ImGui_Console2
         ImGui_Command* command_data = (ImGui_Command*)context;
         ImGui_Console2* console_data = (ImGui_Console2*)command_data->user_data; // we pass the console as user data
 
-        if (console_data == NULL) return 0; // clear command only with console enabled
+        // clear command only with console enabled
+        if (console_data == NULL) return 0;
+        // check if the command line format is ok, and split it in tokens
         if (!split_command_line(command_line, command_line_length, " ", command_line_tokens)) return 0;
 
         if (command_line_tokens.size() > command_data->parameter_count + 1)
         {
-            console_data->output.AddString("# clear command error: bad parameters");
+            console_data->output.AddStringFmt(StringFlag_None, "# %s command error: bad parameters", command_data->name);
             return 0;
         }
 
         console_data->ClearOutput();
+    }
+
+    // help command
+    static int help_cb(const char* command_line, size_t command_line_length, void* context)
+    {
+        std::vector<std::string> command_line_tokens;
+
+        ImGui_Command* command_data = (ImGui_Command*)context;
+        ImGui_Console2* console_data = (ImGui_Console2*)command_data->user_data; // we pass the console as user data
+
+        // clear command only with console enabled
+        if (console_data == NULL) return 0;
+        // check if the command line format is ok, and split it in tokens
+        if (!split_command_line(command_line, command_line_length, " ", command_line_tokens)) return 0;
+
+        if (command_line_tokens.size() > command_data->parameter_count + 1)
+        {
+            console_data->output.AddStringFmt(StringFlag_None, "# %s command error: bad parameters", command_data->name);
+            return 0;
+        }
+        
+        console_data->output.AddStringFmt(StringFlag_History, "help");
+
+        console_data->output.AddString(StringFlag_None, "# available commands: ");
+        for (auto& command_entry : command_table)
+        {
+            ImGui_Command* command = &command_entry.second;
+            if ((command->flags & CommandFlag_Hidden) == 0)
+            {
+                console_data->output.AddStringFmt(StringFlag_None, "# %s ", command->name);
+                if (command->command_description != NULL)
+                {
+                    console_data->output.AddStringFmt(StringFlag_None, "    # command description: %s", command->command_description);
+                }
+            }
+        }
     }
 
     // ImGui text callback
@@ -8215,7 +8264,8 @@ struct ImGui_Console2
                 // clamp between -1 and string header size - 1
                 console_data->history_string_index = IM_CLAMP(console_data->history_string_index, (int)-1, (int)(console_data->output.strings_header.size() - 1));
 
-                // A better implementation would preserve the data on the current input line along with cursor position.
+                // TODO cleanup and maybe? simplify
+                // wrote this at ~ 1 am and hackily fixed the bugs the next day
                 if (prev_history_index != console_data->history_string_index)
                 {
                     if (console_data->history_string_index >= 0)
@@ -8232,7 +8282,7 @@ struct ImGui_Console2
                                     || (console_data->history_string_index < prev_history_index && prev_history_index > string_header_index_to_history_index)
                                     )
                                 {
-                                    new_text_box_from_history = console_data->output.GetStringAtOffset(string_header.offset);
+                                    new_text_box_from_history = console_data->output.GetStringAtIndex(i);
                                     console_data->history_string_index = string_header_index_to_history_index;
 
                                     // if we are scrolling back down, don't stop at the first string we find
@@ -8242,12 +8292,22 @@ struct ImGui_Console2
                                         break;
                                     }
                                 }
+                                // if there's just one history string available, and we hit the button down
+                                // clear the text from the console
+                                // instead of clearing it everytime
+                                else if (i == 0 && prev_history_index == string_header_index_to_history_index)
+                                {
+                                    data->DeleteChars(0, data->BufTextLen);
+                                }
                             }
-                            else if (i == 0 &&
-                                console_data->history_string_index == string_header_index_to_history_index)
+                            // if there's no other string marked as history when using up key, just reset the index and then break
+                            // so we don't actually increase it for no reason
+                            else if (i == 0)
                             {
-                                // if there's no other string marked as history, just reset the index and then break
-                                console_data->history_string_index = prev_history_index;
+                                if (console_data->history_string_index == string_header_index_to_history_index)
+                                {
+                                    console_data->history_string_index = prev_history_index;
+                                }
                             }
                         }
 
@@ -8267,6 +8327,7 @@ struct ImGui_Console2
         }
         break;
 
+        case ImGuiInputTextFlags_CallbackEdit:
         case ImGuiInputTextFlags_CallbackCompletion:
         case ImGuiInputTextFlags_CallbackCharFilter:
         case ImGuiInputTextFlags_CallbackResize:
@@ -8290,12 +8351,10 @@ struct ImGui_Console2
         history_string_index = -1;
         
         std::vector<std::string> command_name;
-        if (split_command_line(command_line, command_line_length, "", command_name, 1))
+        if (split_command_line(command_line, command_line_length, " ", command_name, 1))
         {
-            // printf("command name: %s \n", command_name.at(0).c_str());
-
             ImGui_Command* command_to_execute = NULL;
-            for (auto& command : commands_map)
+            for (auto& command : command_table)
             {
                 if (strnicmp(command.second.name, command_name.at(0).c_str(), strlen(command.second.name)) == 0)
                 {
@@ -8309,12 +8368,12 @@ struct ImGui_Console2
             }
             else
             {
-                output.AddString("# unknown command:");
-                output.AddString(command_name.at(0).c_str(), command_name.at(0).length(), StringFlag_History);
+                output.AddString(StringFlag_None, "# unknown command:");
+                output.AddString(StringFlag_History, command_name.at(0).c_str(), command_name.at(0).length());
             }
-        }
 
-        command_index++;
+            scroll_to_botom = true;
+        }
     }
 
     void Draw(const char* title, bool* p_open)
@@ -8322,17 +8381,9 @@ struct ImGui_Console2
         if (!*p_open) return;
 
         static bool  console_window_initialized = false;
-        static float console_opacity = 0.90f;
 
         ImGuiIO& io = ImGui::GetIO();
-        // TODO when upgrading ImGui, replace with this code
-#if 1
         const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-#endif
-
-        // RECT clientRect;
-        // GetClientRect(window::i()->get_win32_window(), &clientRect);
-        // io.DisplaySize = ImVec2((float)(clientRect.right - clientRect.left), (float)(clientRect.bottom - clientRect.top));
 
         static ImVec2 lastViewportWorkSize(0.0f, 0.0f);
         // a fucking hack because SetNextWindowSizeConstraints is retarded (or maybe I am?)
@@ -8442,7 +8493,8 @@ struct ImGui_Console2
 
         // Command-line
         ImGui::Separator();
-        ImGui::PushItemWidth(-(ImGui::GetStyle().ItemSpacing.x) * 6.0f); // im pretty sure this isn't right but seems to work the best so far
+        ImGuiStyle& style = ImGui::GetStyle();
+        ImGui::PushItemWidth(-(ImGui::CalcTextSize("Enter").x + style.FramePadding.x * 2.0f + 5.0f + 1.0f));
         ImGuiInputTextFlags input_text_flags = 0;
         input_text_flags |= ImGuiInputTextFlags_EnterReturnsTrue;
         input_text_flags |= ImGuiInputTextFlags_AutoSelectAll;
@@ -8474,7 +8526,6 @@ struct ImGui_Console2
             {
                 ExecCommand(input_buffer, input_buffer_string_length);
                 memset(input_buffer, 0, 2);
-                reclaim_focus = true;
             }
         }
 
@@ -8488,9 +8539,11 @@ void InitializeCommandsMap()
     if (InitializeCommandsMap_initialized) return;
     InitializeCommandsMap_initialized = true;
 
-    ImGui_Command clearConsole("clear", "clears the output of the current console", 0, ImGui_Console2::clear_cb);
+    ImGui_Command helpCommand("help", "outputs all commands", 0, ImGui_Console2::help_cb);
+    ImGui_Command clearConsole("clear", "clears the output of the current console and history", 0, ImGui_Console2::clear_cb);
 
-    commands_map.insert({ clearConsole.name, clearConsole });
+    command_table.insert({ helpCommand.name, helpCommand });
+    command_table.insert({ clearConsole.name, clearConsole });
 }
 
 void ImGui_ShowConsoleWindow_Impl(const char* title, bool* p_open)
