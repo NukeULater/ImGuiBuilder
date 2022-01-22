@@ -79,6 +79,9 @@
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="third-party\ImGui\imgui_demo.cpp" />
     <ClCompile Include="third-party\ImGui\imgui_stdlib.cpp" />
+    <ClCompile Include="Nuke%27s Stuff\CommandHandler.cpp" />
+    <ClCompile Include="Nuke%27s Stuff\ImGui_Console_impl.cpp" />
+    <ClCompile Include="third-party\rapidfuzz\rapidfuzz\details\unicode.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main\imgui_builder.h">
@@ -147,5 +150,29 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="third-party\ImGui\opengl\imgui_impl_opengl3_loader.h" />
     <ClInclude Include="third-party\ImGui\imgui_stdlib.h" />
+    <ClInclude Include="Nuke%27s Stuff\CommandHandler.h" />
+    <ClInclude Include="Nuke%27s Stuff\ImGui_Console_Impl.h" />
+    <ClInclude Include="Nuke%27s Stuff\CommandsUtil.h" />
+    <ClInclude Include="third-party\rapidfuzz\rapidfuzz\details\string_metrics\generic_levenshtein_impl.hpp" />
+    <ClInclude Include="third-party\rapidfuzz\rapidfuzz\details\string_metrics\jaro_impl.hpp" />
+    <ClInclude Include="third-party\rapidfuzz\rapidfuzz\details\string_metrics\levenshtein_editops_impl.hpp" />
+    <ClInclude Include="third-party\rapidfuzz\rapidfuzz\details\string_metrics\levenshtein_impl.hpp" />
+    <ClInclude Include="third-party\rapidfuzz\rapidfuzz\details\string_metrics\weighted_levenshtein_impl.hpp" />
+    <ClInclude Include="third-party\rapidfuzz\rapidfuzz\details\common.hpp" />
+    <ClInclude Include="third-party\rapidfuzz\rapidfuzz\details\common_impl.hpp" />
+    <ClInclude Include="third-party\rapidfuzz\rapidfuzz\details\intrinsics.hpp" />
+    <ClInclude Include="third-party\rapidfuzz\rapidfuzz\details\matching_blocks.hpp" />
+    <ClInclude Include="third-party\rapidfuzz\rapidfuzz\details\SplittedSentenceView.hpp" />
+    <ClInclude Include="third-party\rapidfuzz\rapidfuzz\details\string_view.hpp" />
+    <ClInclude Include="third-party\rapidfuzz\rapidfuzz\details\type_traits.hpp" />
+    <ClInclude Include="third-party\rapidfuzz\rapidfuzz\details\types.hpp" />
+    <ClInclude Include="third-party\rapidfuzz\rapidfuzz\details\unicode.hpp" />
+    <ClInclude Include="third-party\rapidfuzz\rapidfuzz\details\unicodetype_db.h" />
+    <ClInclude Include="third-party\rapidfuzz\rapidfuzz\fuzz.hpp" />
+    <ClInclude Include="third-party\rapidfuzz\rapidfuzz\fuzz_impl.hpp" />
+    <ClInclude Include="third-party\rapidfuzz\rapidfuzz\rapidfuzz_all.hpp" />
+    <ClInclude Include="third-party\rapidfuzz\rapidfuzz\string_metric.hpp" />
+    <ClInclude Include="third-party\rapidfuzz\rapidfuzz\utils.hpp" />
+    <ClInclude Include="third-party\rapidfuzz\rapidfuzz\utils_impl.hpp" />
   </ItemGroup>
 </Project>

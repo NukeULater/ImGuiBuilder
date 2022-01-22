@@ -2,6 +2,8 @@
 
 #include "the_window.h"
 
+#include "Nuke's Stuff/CommandHandler.h"
+
 // TODO Singleton
 window* window::window_instance = nullptr;
 
@@ -56,6 +58,8 @@ window::window( void* func_draw ) : m_func_draw( func_draw )
 	auto clear_color = ImVec4( 0.30f, 0.30f, 0.30f, 1.00f );
 
 	m_window = GetForegroundWindow( );
+
+	InitializeCommandsMap();
 }
 
 /// <summary>

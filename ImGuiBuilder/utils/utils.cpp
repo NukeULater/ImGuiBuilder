@@ -14,7 +14,6 @@ std::vector<std::string> utils::split( const std::string& s, char delimiter )
 	return tokens;
 }
 
-
 bool utils::is_number( std::string& s )
 {
 	auto find = s.find( ' ' );

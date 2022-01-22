@@ -896,7 +896,7 @@ void imgui_builder::delete_form( int form_id )
 
 	if ( !m_objs.empty( ) && !m_forms.empty( ) )
 	{
-		for ( auto i = m_objs.size( ) - 1; i > -1; --i )
+		for ( auto i = m_objs.size( ) - 1; i >= 0; --i )
 		{
 			std::cout << i << std::endl;
 			if ( m_objs[ i ].form == form_id )
