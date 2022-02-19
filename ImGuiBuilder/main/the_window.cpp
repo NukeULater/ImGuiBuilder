@@ -3,6 +3,7 @@
 #include "the_window.h"
 
 #include "Nuke's Stuff/CommandHandler.h"
+#include "Nuke's Stuff/CommandCollection.h"
 
 // TODO Singleton
 window* window::window_instance = nullptr;
@@ -59,7 +60,7 @@ window::window( void* func_draw ) : m_func_draw( func_draw )
 
 	m_window = GetForegroundWindow( );
 
-	InitializeCommandsMap();
+	CommandCollection::InitializeCommandsMap();
 }
 
 /// <summary>

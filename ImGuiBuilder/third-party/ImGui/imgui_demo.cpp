@@ -165,7 +165,7 @@ Index of this file:
 #endif
 
 #include "Nuke's Stuff/CommandHandler.h"
-#include "Nuke's Stuff/ImGui_Console_impl.h"
+#include "Nuke's Stuff/ImGuiConsoleimpl.h"
 
 //-----------------------------------------------------------------------------
 // [SECTION] Forward Declarations, Helpers
@@ -272,7 +272,7 @@ bool draw_real_demo_window = false;
 // You may then search for keywords in the code when you are interested by a specific feature.
 void ImGui::ShowDemoWindow(bool* p_open)
 {
-    ImGui_Console2_OpenDefault("Nuke's Console", p_open);
+    ImGui_Console_OpenDefault("Nuke's Console", p_open);
     if (!draw_real_demo_window) return;
 
     p_open = &draw_real_demo_window;

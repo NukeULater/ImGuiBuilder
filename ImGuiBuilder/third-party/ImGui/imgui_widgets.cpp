@@ -3978,7 +3978,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
     const bool is_resizable = (flags & ImGuiInputTextFlags_CallbackResize) != 0;
     const bool is_displaying_suggestion_popup = (flags & ImGuiInputTextFlags_DisplaySuggestions) != 0;
 
-    const ImGuiTextInputCompletion* completion = NULL;
+    ImGuiTextInputCompletion* completion = NULL;
 
     if (is_resizable)
         IM_ASSERT(callback != NULL); // Must provide a callback if you set the ImGuiInputTextFlags_CallbackResize flag!
@@ -4829,7 +4829,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
     // create the suggestions window
     if (is_displaying_suggestion_popup && input_text_is_active && completion != NULL)
     {
-        ImGuiID suggestion_menu_id = g.CurrentWindow->GetID("##text_input_sugestions");
+        ImGuiID suggestion_menu_id = g.CurrentWindow->GetID("##text_input_suggestions");
         bool popup_open = IsPopupOpen(suggestion_menu_id, ImGuiPopupFlags_None);
         /* there's anything to display? */
         if (!popup_open)
@@ -4844,10 +4844,27 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
         // TODO add support to display the suggestion above the text input frame
         if (BeginTextInputSuggestionPopup(suggestion_menu_id, 0))
         {
+            char completion_candidate_display[1024];
+            completion_candidate_display[0] = '\x0';
+
             for (int i = 0; i < completion->Count; i++)
             {
+                ImGuiTextInputCompletionCandidate* completionData = &completion->CompletionCandidate[i];
+                strncpy(completion_candidate_display, completionData->CompletionText, sizeof(completion_candidate_display));
+
+                if (completionData->CompletionVariable != nullptr)
+                {
+                    strncat(completion_candidate_display, " : ", sizeof(completion_candidate_display));
+                    strncat(completion_candidate_display, completionData->CompletionVariable, sizeof(completion_candidate_display));
+                }
+
                 bool selected = i == completion->SelectedCandidateIndex;
-                if (ImGui::Selectable(completion->CompletionCandidate[i].CompletionText, selected)) {}
+                if (ImGui::Selectable(completion_candidate_display, selected))
+                {
+                    // TODO FIXME for some reason clicking the completion candidate doesn't work
+                    // probably thinks the background is clicked
+                    completion->ClickedCandidateIndex = i;
+                }
             }
 
             EndPopup();

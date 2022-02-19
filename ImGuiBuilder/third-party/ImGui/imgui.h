@@ -1989,7 +1989,7 @@ struct ImGuiInputTextCallbackData
     int                 SelectionStart; //                                      // Read-write   // [Completion,History,Always] == to SelectionEnd when no selection)
     int                 SelectionEnd;   //                                      // Read-write   // [Completion,History,Always]
 
-    const ImGuiTextInputCompletion*   CompletionData;
+    ImGuiTextInputCompletion*   CompletionData;
 
     // Helper functions for text manipulation.
     // Use those function to benefit from the CallbackResize behaviors. Calling those function reset the selection.
@@ -2265,6 +2265,7 @@ struct ImGuiTextInputCompletionCandidate
 {
     const char* CompletionText;
     const char* CompletionDescription; // optional
+    const char* CompletionVariable;
     ImColor     CompletionTextColor;
     ImColor     CompletionDescriptionTextColor;
 };
@@ -2272,8 +2273,16 @@ struct ImGuiTextInputCompletionCandidate
 struct ImGuiTextInputCompletion
 {
     int                                 SelectedCandidateIndex;
-    int                                 Count;
+    int                                 ClickedCandidateIndex;
+    unsigned int                        Count;
     ImGuiTextInputCompletionCandidate*  CompletionCandidate;
+
+    ImGuiTextInputCompletion(unsigned int _candidatesCount)
+    {
+        this->SelectedCandidateIndex = -1;
+        this->ClickedCandidateIndex = -1;
+        this->Count = _candidatesCount;
+    };
 };
 
 //-----------------------------------------------------------------------------

@@ -1,102 +1,111 @@
 #include "pch.h"
 
 #include "CommandHandler.h"
+#include "CommandCollection.h"
 
-std::unordered_set<void*> command_table;
+const char command_error_not_enough_params[] = "# %s command error: invalid parameter count";
 
-ImGui_ConsoleCommand::ImGui_ConsoleCommand(const char* _name, const char* _command_description, int _parameter_count, ImGui_ExecuteCommandCallback* _callback,
-    CommandFlags _flags)
+ConsoleCommand::ConsoleCommand(const char* _name, const char* _command_description, int _min_parameter_count, int _max_parameter_count, ExecuteCommandCallbackT* _input_callback,
+	CommandFlags _flags)
 {
-    flags = _flags;
-    name = _name;
-    command_description = _command_description;
-    parameter_count = _parameter_count;
-    p_execute_command_callback = _callback;
-    user_data = NULL;
+	m_name = _name;
+	m_command_description = _command_description;
+	m_flags = _flags;
+	m_min_parameter_count = _min_parameter_count;
+	m_max_parameter_count = _max_parameter_count;
+	p_exec_command_cb = _input_callback;
+	m_user_data = nullptr;
 }
 
-bool ImGui_ConsoleCommand::HandleCommandLine(const char* command_line, size_t command_line_length, void* context)
+bool ConsoleCommand::CheckArgs(ConsoleCommandCtxData* cb_data, const char* command_line, const std::vector<std::string>& tokens)
 {
-    bool ret = false;
+	IOutput* output = cb_data->strOutput;
+	const ConsoleCommand* command_data = cb_data->consoleCommandData;
+	if (command_data == nullptr)
+		return false;
 
-    std::vector<std::string> command_first_tokens;
-    if (tokenize(command_line, command_line_length, " ", command_first_tokens, 2))
-    {
-        ImGui_ConsoleCommand* command_to_execute = NULL;
-        for (auto& command_ptr : command_table)
-        {
-            ImGui_ConsoleCommand* command = (ImGui_ConsoleCommand*)command_ptr;
-            if (strnicmp(command->GetName(), command_first_tokens.at(0).c_str(), strlen(command->GetName())) == 0)
-            {
-                command_to_execute = command;
-            }
-        }
+	// + 1 to count for the actual command
+	if (tokens.size() < command_data->GetMinParameterCount() + 1
+		|| tokens.size() > command_data->GetMaxParameterCount() + 1)
+	{
+		if (command_data->Hidden())
+		{
+			output->Output(StringFlag_None, "# unknown command: ");
+			output->Output(StringFlag_History, command_line);
+		}
+		else
+		{
+			output->OutputFmt(StringFlag_None, command_error_not_enough_params, command_data->GetName());
+		}
 
-        if (command_to_execute != NULL)
-        {
-            command_to_execute->ExecuteCommand(command_line, command_line_length, context);
-            ret = true;
-        }
-    }
+		return false;
+	}
 
-    return ret;
+	return true;
 }
 
-void ImGui_ConsoleCommand::ExecuteCommand(const char* command_line, size_t command_line_length, void* context) const
+bool ConsoleCommand::ExecCommand(const char* command_line, size_t command_line_length, const std::vector<std::string>& tokens, IOutput* ctx, ConsoleCommand* command)
 {
-    // create a copy of the current command, then set the user data
-    // this should allow using this this command in multiple threads if needed
+	ConsoleCommandCtxData command_data;
+	command_data.strOutput = ctx;
+	command_data.commandVar = nullptr;
+	command_data.consoleCommandData = command;
+	IOutput* output = command_data.strOutput;
 
-    // quite ugly here, might confuse some ppl when they see "context"
-    if (CommandSetsVariable())
-    {
-        // we do this because we allocate more memory with ImGui_VarCommand
-        // maybe find cleaner way?
-        ImGui_ConsoleVarCommand* varCommand = (ImGui_ConsoleVarCommand*)this;
-        ImGui_ConsoleVarCommand current_command(*varCommand);
-        current_command.user_data = context;
-        p_execute_command_callback(command_line, command_line_length, &current_command);
-    }
-    else
-    {
-        ImGui_ConsoleCommand current_command(*this);
-        current_command.user_data = context;
-        p_execute_command_callback(command_line, command_line_length, &current_command);
-    }
+	if (CheckArgs(&command_data, command_line, tokens))
+	{
+		if (const auto* varCommand = dynamic_cast<const ConsoleVarCommand*>(command))
+		{
+			command_data.commandVar = varCommand->m_var_ptr;
+			command->p_exec_command_cb(tokens, command_data);
+		}
+		else
+		{
+			command->p_exec_command_cb(tokens, command_data);
+		}
+
+		return true;
+	}
+
+	return false;
 }
 
-CommandVar ImGui_ConsoleVarCommand::queryVariable(void* context)
+// static function, executes command
+bool ConsoleCommand::HandleCommandLine(const char* command_line, size_t command_line_length, IOutput* output)
 {
-    return p_query_variable_callback(context);
+	bool ret = false;
+
+	std::vector<std::string> command_first_tokens;
+	if (tokenize(command_line, command_line_length, " ", command_first_tokens))
+	{
+		ConsoleCommand* command = nullptr;
+		for (auto command_entry : CommandCollection::commandTable)
+		{
+			if (_strnicmp(command_entry->GetName(), command_first_tokens[0].c_str(), command_first_tokens[0].length()) == 0)
+			{
+				command = command_entry;
+				break;
+			}
+		}
+
+		if (command != nullptr)
+		{
+			output->OutputFmt(StringFlag_History, command_line);
+			ret = ConsoleCommand::ExecCommand(command_line, command_line_length, command_first_tokens, output, command);
+		}
+		else
+		{
+			output->Output(StringFlag_None, "# unknown command: ");
+			output->Output(StringFlag_History, command_line);
+		}
+	}
+
+	return ret;
 }
 
-ImGui_ConsoleVarCommand::ImGui_ConsoleVarCommand(const char* _name, const char* _command_description, int _parameter_count, ImGui_QueryVarCallback* _query_var_callback,
-    ImGui_ExecuteCommandCallback* _callback, CommandFlags _flags) :
-    ImGui_ConsoleCommand(_name, _command_description, _parameter_count, _callback, flags | CommandFlag_SetsVariable)
+ConsoleVarCommand::ConsoleVarCommand(const char* _name, const char* _var_description, int _min_parameter_count, int _max_parameter_count, ExecuteCommandCallbackT* _callback, ComVar* _var_ptr, CommandFlags _flags)
+	: ConsoleCommand(_name, _var_description, _min_parameter_count, _max_parameter_count, _callback, _flags | CommandFlag_SetsVariable)
 {
-    p_query_variable_callback = _query_var_callback;
-}
-
-// externs
-// just create functions with _Initialize_Command_List added to the file's name as the name function
-// and add them here
-extern void ImGui_Console_impl_Initialize_Command_List();
-
-void InitializeCommandsMap()
-{
-    static bool InitializeCommandsMap_initialized = false;
-    if (InitializeCommandsMap_initialized) return;
-    InitializeCommandsMap_initialized = true;
-
-    ImGui_Console_impl_Initialize_Command_List();
-
-    atexit([]() -> void {
-        for (auto& command : command_table)
-        {
-
-        }
-
-        command_table.clear();
-        }
-    );
+	m_var_ptr = _var_ptr;
+	memset(m_var_str, 0, sizeof(m_var_str));
 }

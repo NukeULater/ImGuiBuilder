@@ -23,6 +23,7 @@
 #include <fstream>
 #include <sstream>
 #include <memory>
+#include <mutex>
 #include <unordered_set>
 
 // ===========================
@@ -58,6 +59,12 @@
 // ===========================
 // MISC
 // ===========================
+
+#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || (defined(__cplusplus) && (__cplusplus >= 201703L)))
+#define CONSTEXPR constexpr
+#else
+#define CONSTEXPR
+#endif
 
 // ===========================
 // MISC /
